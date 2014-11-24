@@ -30,6 +30,7 @@ def setOutputFilename():
         if not None == cdHeader:
             _, params = cgi.parse_header(cdHeader)
             outputFilename = params['filename']
+            outputFilename = posixpath.splitext(outputFilename)[0] + '_filtered.ics'
         else:
             outputFilename = 'filtered.ics'
     else: #Local file
