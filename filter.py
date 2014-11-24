@@ -6,9 +6,11 @@ import cgi
 import posixpath
 
 from rfc3987 import match
-
 from icalendar import Calendar
 
+if len(sys.argv) < 3:
+    print('ERROR: Missing iCal file or URL or filter criteria')
+    sys.exit(1)
 
 ical = sys.argv[1]
 filterList = sys.argv[2:]
@@ -21,7 +23,7 @@ def setOutputFilename():
         try:
             schedule = urllib.request.urlopen(ical, None)
         except URLError:
-            print("Error while retrieving iCalendar file from URL: " + ical)
+            print("ERROR: Error while retrieving iCalendar file from URL: " + ical)
             sys.exit(1)
 
         cdHeader = schedule.getheader('Content-Disposition')
