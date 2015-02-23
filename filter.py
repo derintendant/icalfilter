@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/local/bin/python3
 
 import sys
 import posixpath
@@ -8,17 +8,19 @@ from icalendar import Calendar
 
 
 def usage():
-    print("Usage: " + sys.argv[0] + "[-i input_file] -f filter_file")
+    print("Usage: " + sys.argv[0] + "[-x] [-i input_file] -f filter_file")
 
 
 def main(argv):
     inputFile = sys.stdin
     fromStdin = True
+    inverse = False
     outputFilename = 'ical_filtered.ics'
     filterFilename=''
     filterlist = list()
+
     try:
-        opts, args = getopt.getopt(argv, "hi:f:", ["help", "input=", "filter="])
+        opts, args = getopt.getopt(argv, "hxi:f:", ["help", "inverse", "input=", "filter="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -27,14 +29,16 @@ def main(argv):
         if opt in ("-h", "--help"):
             usage()
             sys.exit()
+        if opt in ("-x", "--inverse"):
+            inverse = True
         if opt in ("-i", "--input"):
-            inputFilename = arg                                               # TODO: exception check
+            inputFilename = arg
             outputFilename = posixpath.splitext(arg)[0] + '_filtered.ics'
             fromStdin = False
         if opt in ("-f", "--filter"):
             filterFilename = arg
 
-    if filterFilename == '':
+    if '' == filterFilename:
         usage()
         sys.exit(2)
 
@@ -67,8 +71,12 @@ def main(argv):
     for event in calendar.walk():
         if 'SUMMARY' in event.keys():
             summary = event['SUMMARY'].lower()
-            if any(key in summary for key in filterlist):
-                filtered.add_component(event)   # Adds component to resulting iCal file
+            if inverse:	
+            	if not any(key in summary for key in filterlist):
+                	filtered.add_component(event)   # Adds component to resulting iCal file
+            else:
+            	if any(key in summary for key in filterlist):
+                	filtered.add_component(event)   # Adds component to resulting iCal file
 
     writeFile(filename=outputFilename, filecontents=filtered.to_ical())
 
